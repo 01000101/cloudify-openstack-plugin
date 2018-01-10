@@ -6,8 +6,8 @@ plugins:
   openstack:
     executor: central_deployment_agent
     source: https://github.com/01000101/cloudify-openstack-plugin/archive/2.5.0-floating-ip-pref.zip
-    package_name: cloudify-openstack-fipfix-plugin
-    package_version: '2.5.0'
+    package_name: cloudify-openstack-plugin
+    package_version: '2.5.0-fip-fix'
 
 node_types:
   cloudify.openstack.nodes.Server:
