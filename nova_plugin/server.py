@@ -558,6 +558,11 @@ def connect_floatingip(nova_client, fixed_ip, **kwargs):
         return ctx.operation.retry(message='Failed to assign floating ip {0}'
                                            ' to machine {1}.'
                                    .format(floating_ip_address, server_id))
+    # Preference the floating IP if the user has requested it
+    if floating_ip_address and \
+       ctx.node.properties.get('preference_floating_ip'):
+        ctx.logger.info('User requested to preference floating IP address')
+        ctx.instance.runtime_properties[IP_PROPERTY] = floating_ip_address
 
 
 @operation
