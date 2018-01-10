@@ -392,7 +392,8 @@ def get_port_networks(neutron_client, port_ids):
 
 @operation
 @with_nova_client
-def start(nova_client, start_retry_interval, private_key_path, **kwargs):
+def start(nova_client, start_retry_interval,
+          ip_address, private_key_path, **kwargs):
     server = get_server_by_context(nova_client)
 
     if is_external_resource_not_conditionally_created(ctx):
@@ -420,6 +421,9 @@ def start(nova_client, start_retry_interval, private_key_path, **kwargs):
             ctx.logger.info('Server has been set with a password')
 
         _set_network_and_ip_runtime_properties(server)
+        if ip_address:
+            ctx.instance.runtime_properties[IP_PROPERTY] = ip_address
+
         return
 
     server_task_state = getattr(server, OS_EXT_STS_TASK_STATE)
@@ -558,11 +562,6 @@ def connect_floatingip(nova_client, fixed_ip, **kwargs):
         return ctx.operation.retry(message='Failed to assign floating ip {0}'
                                            ' to machine {1}.'
                                    .format(floating_ip_address, server_id))
-    # Preference the floating IP if the user has requested it
-    if floating_ip_address and \
-       ctx.node.properties.get('preference_floating_ip'):
-        ctx.logger.info('User requested to preference floating IP address')
-        ctx.instance.runtime_properties[IP_PROPERTY] = floating_ip_address
 
 
 @operation

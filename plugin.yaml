@@ -57,14 +57,6 @@ node_types:
           this connection is made automatically and there's no need to override this property
           (See the Misc section for more information on the Openstack Provider Context).
           It is not required to set the value of this property to the management network name. As of Cloudify 4.0, it has no relationship to the bootstrap process.
-      preference_floating_ip:
-        required: false
-        description: >
-          When Floating IPs are connected to the resource, a user can decide to preference
-          the Floating IP address as the server's "primary" address instead of the default behavior
-          of preferencing the Port (often private) address. This is useful for cases when the
-          Manager will attempt to install an agent on the resource (using the "remote" method)
-          and the resource is not network reachable via its Port IP address. 
       use_password:
         default: false
         description: >
@@ -97,6 +89,14 @@ node_types:
                 Path to private key which matches the server's
                 public key. Will be used to decrypt password in case
                 the "use_password" property is set to "true"
+              type: string
+              default: ''
+            ip_address:
+              description: >
+                IP address to use instead of the default detected IP address of the instance.
+                This is useful for cases when the Manager will attempt to install an agent on
+                the resource (using the "remote" method) and the resource is not network
+                reachable via its normal IP address.
               type: string
               default: ''
             openstack_config:
