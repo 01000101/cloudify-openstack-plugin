@@ -97,6 +97,7 @@ def create(neutron_client, args, **kwargs):
 @operation
 @with_neutron_client
 def update(neutron_client, args, **kwargs):
+    ctx.logger.debug('router.update()')
     update_router(neutron_client, args, **kwargs)
 
 
@@ -118,27 +119,36 @@ def update_router(neutron_client, args, **kwargs):
                 result[k] = deepcopy(v)
         return result
 
+    ctx.logger.debug('Checking for relationship type')
+
     # Find out if the update script is being called
     # from a relationship or a node operation.
     if ctx.type == RELATIONSHIP_INSTANCE:
         if ROUTER_OPENSTACK_TYPE in \
                 ctx.source.instance.runtime_properties.get(
                     OPENSTACK_TYPE_PROPERTY):
+            ctx.logger.debug('Relationship source is the Router')
             subject = ctx.source
         elif ROUTER_OPENSTACK_TYPE in \
                 ctx.target.instance.runtime_properties.get(
                     OPENSTACK_TYPE_PROPERTY):
+            ctx.logger.debug('Relationship target is the Router')
             subject = ctx.target
         else:
             raise NonRecoverableError(
                 'Neither target nor source is {0}'.format(
                     ROUTER_OPENSTACK_TYPE))
     else:
+        ctx.logger.debug('No relationship found. Assuming instance is Router')
         subject = ctx
 
     try:
+        ctx.logger.debug(
+            'Fetching router: %s'
+            % subject.instance.runtime_properties[OPENSTACK_ID_PROPERTY])
         router = neutron_client.show_router(
             subject.instance.runtime_properties[OPENSTACK_ID_PROPERTY])
+        ctx.logger.debug('Received: %s' % router)
     except NeutronClientException as e:
         raise NonRecoverableError('Error: {0}'.format(str(e)))
     if not isinstance(router, dict) or \
@@ -150,7 +160,9 @@ def update_router(neutron_client, args, **kwargs):
     router_id = router['router'].pop('id')
 
     new_router = {'router': {}}
+    ctx.logger.debug('Iterating over update keys')
     for key, value in args.items():
+        ctx.logger.debug('Key: %s, Val: %s' % (key, value))
         new_router['router'][key] = value
 
     for ro_attribute in ['status', 'tenant_id']:
@@ -159,6 +171,7 @@ def update_router(neutron_client, args, **kwargs):
         except KeyError:
             pass
 
+    ctx.logger.debug('dict_merge(%s, %s)' % (new_router, router))
     dict_merge(new_router, router)
     ctx.logger.info(new_router)
     neutron_client.update_router(router_id, new_router)
