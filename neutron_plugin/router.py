@@ -123,7 +123,17 @@ def update_router(neutron_client, args, **kwargs):
 
     # Find out if the update script is being called
     # from a relationship or a node operation.
+    ctx.logger.debug('ctx: %s' % ctx)
     if ctx.type == RELATIONSHIP_INSTANCE:
+        ctx.logger.debug('Relationship type found: %s' % ctx.type)
+        ctx.logger.debug('source: %s' % ctx.source)
+        ctx.logger.debug('source instance: %s' % ctx.source.instance)
+        ctx.logger.debug('source instance RTP: %s' %
+                         ctx.source.instance.runtime_properties)
+        ctx.logger.debug('target: %s' % ctx.target)
+        ctx.logger.debug('target instance: %s' % ctx.target.instance)
+        ctx.logger.debug('target instance RTP: %s' %
+                         ctx.target.instance.runtime_properties)
         if ROUTER_OPENSTACK_TYPE in \
                 ctx.source.instance.runtime_properties.get(
                     OPENSTACK_TYPE_PROPERTY):
